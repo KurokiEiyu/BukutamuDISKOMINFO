@@ -1,0 +1,124 @@
+<html>
+</head>
+	<title> Buku Tamu </title>
+	<style type="text/css">
+	body { font-family:tahoma; font-size:12px; }
+	#container { width:450px; padding:20px 40px; margin:50px auto; border:0px solid #555; box-shadow:0px 0px 2px #555; }
+	input[type="text"] { width:200px; }
+	input[type="text"], textarea { padding:5px; margin:2px 0px; border: 1px solid #777; }
+	input[type="submit"], input[type="reset"] { padding: 5px 20px; margin:2px 0px; font-weight:bold; cursor:pointer; }
+	#error { border:1px solid red; background:#ffc0c0; padding:5px; }
+</style>
+</head>
+<body>
+	
+	<div id="container">
+		<h1>Buku Tamu</h1>
+		<p>Silahkan isi buku tamu di bawah ini!</p>
+
+	<form action="indeks.php" method="post">
+			<p><b>nama :</b><br><input type="text" name="nama" required /></p>
+			<p><b>asal instansi :</b><br><input type="text" name="asal instansi" required /></p>
+			<p><b>alamat :</b><br><input type="text" name="alamat"/></p>
+			<p><b>nomor telepon :</b><br><input type="int" rows="20" name="nomor telepon"></int></p>
+			<p><input type="submit" name="go" value="Kirim" /> <input type="reset" name="del" value="Hapus" /></p>		
+		<?php
+if($_POST['go']){
+	mysql_connect("localhost", "root", "root");
+	mysql_select_db("buku_tamu");
+ 
+	$nama			= htmlentities(mysql_real_escape_string($_POST['nama']));
+	$asal instansi	= htmlentities(mysql_real_escape_string($_POST['asal instansi']));
+	$alamat			= htmlentities(mysql_real_escape_string($_POST['alamat']));
+	$tgl			= time();
+ 
+	if($nama && $asal intsansi &&){
+		if(filter_var($asal instansi)){
+			$in = mysql_query("INSERT INTO buku_tamu VALUES(NULL, '$tgl', '$nama', '$asal instansi', '$alamat')");
+			if($in){
+				echo '<script language="javascript">alert("Terima kasih, data Anda berhasil disimpan"); document.location="indeks.php";</script>';
+			}else{
+				echo '<div id="error">Query ke database gagal dilakukan!</div>';
+			}
+		}else{
+			echo '<div id="error">asal instansi Anda tidak valid!</div>';
+		}
+	}else{
+		echo '<div id="error">Lengkapi form!</div>';
+	}
+}
+?>
+		<?php
+	include "koneksiDB.php";
+
+	$nama_file = $_FILES['gambar']['name'];
+	$ukuran_file = $_FILES['gambar']['size'];
+	$tipe_file = $_FILES['gambar']['type'];
+	$tmp_file = $_FILES['gambar']['tmp_name'];
+
+	$path = "images/".$nama_file;
+
+if($tipe_file == "image/jpeg" || $tipe_file == "image/png"){
+  if($ukuran_file <= 1000000000){
+    if(move_uploaded_file($tmp_file, $path)){
+      $query = "INSERT INTO gambar(nama,ukuran,tipe) VALUES('".$nama_file."','".$ukuran_file."','".$tipe_file."')";
+      $sql = mysqli_query($connect, $query);
+      if($sql){
+        header("location: indeks.php");
+      }else{
+        echo "Maaf, Terjadi kesalahan saat mencoba untuk menyimpan data ke database.";
+        echo "<br><a href='form.php'>Kembali Ke Form</a>";
+      }
+    }else{
+      echo "Maaf, Gambar gagal untuk diupload.";
+      echo "<br><a href='form.php'>Kembali Ke Form</a>";
+    }
+  }else{
+    echo "Maaf, Ukuran gambar yang diupload tidak boleh berlebihan";
+    echo "<br><a href='form.php'>Kembali Ke Form</a>";
+  }
+}else{
+  echo "Maaf, Tipe gambar yang diupload harus JPG / JPEG / PNG.";
+  echo "<br><a href='form.php'>Kembali Ke Form</a>";
+}
+?>
+		
+		<h1>Data Gambar</h1><hr>
+	<a href="indeks.php">Tambah Gambar</a><br><br>
+	<table border="1" cellpadding="8">
+	<tr>
+		<th>Gambar</th>
+		<th>Nama File</th>
+		<th>Ukuran File</th>
+		<th>Tipe File</th>
+	</tr>
+	
+	<?php
+include "koneksiDB.php";
+
+$query = "SELECT * FROM gambar";
+$sql = mysqli_query($connect, $query);
+$row = mysqli_num_rows($sql);
+
+if($row > 0){
+  while($data = mysqli_fetch_array($sql)){
+    echo "<tr>";
+    echo "<td><img src='images/".$data['nama']."' width='100' height='100'></td>";
+    echo "<td>".$data['nama']."</td>";
+    echo "<td>".$data['ukuran']."</td>";
+    echo "<td>".$data['tipe']."</td>";
+    echo "</tr>";
+  }
+}else{
+  echo "<tr><td colspan='4'>Data tidak ada</td></tr>";
+}
+?>
+	<h1> Gambar </h1>
+			<form method="post" enctype="multipart/form-data" action="indeks.php">
+			<input type="file" name="gambar">
+			<input type="submit" value="Upload">
+		</form>
+	</div>
+ 
+</body>
+</html>
